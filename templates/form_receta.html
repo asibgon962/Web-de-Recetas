@@ -116,6 +116,9 @@
             </div>
           {% endfor %}
         </div>
+        <button type="button" class="btn btn-outline-rustico btn-sm mt-3" id="btn-anadir-ingrediente">
+          <i class="bi bi-plus-lg"></i> Añadir ingrediente
+        </button>
       </div>
     </div>
 
@@ -128,4 +131,26 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const container = document.getElementById('ingredientes-container');
+  const btnAnadir = document.getElementById('btn-anadir-ingrediente');
+  const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+  btnAnadir.addEventListener('click', function () {
+    const formCount = parseInt(totalForms.value);
+    const firstForm = container.querySelector('.formset-ingrediente');
+    const newForm = firstForm.cloneNode(true);
+
+    newForm.innerHTML = newForm.innerHTML.replace(/form-(\d+)-/g, 'form-' + formCount + '-');
+
+    newForm.querySelectorAll('input, textarea').forEach(el => el.value = '');
+    newForm.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+    container.appendChild(newForm);
+    totalForms.value = formCount + 1;
+  });
+</script>
 {% endblock %}
