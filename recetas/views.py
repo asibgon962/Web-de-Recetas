@@ -19,9 +19,9 @@ def registro(request):
             login(request, user)
             messages.success(request, f"¡Bienvenido, {user.username}!")
             return redirect('listado_recetas')
-        else:
-            form = UserCreationForm()
-        return render(request, 'registro.html', {'form': form})
+    else:
+        form = UserCreationForm()
+    return render(request, 'registro.html', {'form': form})
     
 def login_view(request):
     if request.user.is_authenticated:
