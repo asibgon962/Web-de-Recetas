@@ -68,7 +68,7 @@ def listado_recetas(request):
     }
     recetas = recetas.order_by(opciones_orden.get(orden, "-creado_en"))
  
-    return render(request, "recetas/listado.html", {
+    return render(request, "listado.html", {
         "recetas": recetas,
         "categorias": categorias,
         "categoria_activa": categoria_activa,
@@ -105,7 +105,7 @@ def detalle_receta(request, slug):
             messages.success(request, "¡Valoración enviada!")
             return redirect("detalle_receta", slug=slug)
  
-    return render(request, "recetas/detalle.html", {
+    return render(request, "detalle.html", {
         "receta": receta,
         "ingredientes": ingredientes,
         "valoraciones": valoraciones,
@@ -153,7 +153,7 @@ def crear_receta(request):
         form = RecetaForm()
         formset = IngredienteFormSet(queryset=RecetaIngrediente.objects.none())
  
-    return render(request, "recetas/form_receta.html", {
+    return render(request, "form_receta.html", {
         "form": form,
         "formset": formset,
         "accion": "Crear",
@@ -199,7 +199,7 @@ def editar_receta(request, slug):
             queryset=RecetaIngrediente.objects.filter(receta=receta)
         )
  
-    return render(request, "recetas/form_receta.html", {
+    return render(request, "form_receta.html", {
         "form": form,
         "formset": formset,
         "receta": receta,
@@ -219,7 +219,7 @@ def eliminar_receta(request, slug):
         receta.delete()
         messages.success(request, "Receta eliminada.")
         return redirect("listado_recetas")
-    return render(request, "recetas/confirmar_eliminar.html", {"receta": receta})
+    return render(request, "confirmar_eliminar.html", {"receta": receta})
 
 
 # Perfil de Usuario
@@ -228,7 +228,7 @@ def perfil_usuario(request, username):
     from django.contrib.auth.models import User
     usuario = get_object_or_404(User, username=username)
     recetas = Receta.objects.filter(autor=usuario, publicado=True).order_by("-creado_en")
-    return render(request, "recetas/perfil.html", {
+    return render(request, "perfil.html", {
         "usuario": usuario,
         "recetas": recetas,
     })

@@ -15,28 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from . import views
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-
-    # Rutas de registro
-    path("registro/", views.registro, name="registro"),
-    path("login/", views.login_view, name="login"),
-    path("logout/", views.logout_view, name="logout"),
-
-    # Rutas de recetas
-    path("", views.listado_recetas, name="listado_recetas"),
-    path("reta/nueva/", views.crear_receta, name="crear_receta"),
-    path("receta/<slug:slug>/", views.detalle_receta, name="detalle_receta"),
-    path("receta/<slug:slug>/editar/", views.editar_receta, name="editar_receta"),
-    path("receta/<slug:slug>/eliminar/", views.eliminar_receta, name="eliminar_receta"),
-
-    # Ruta de perfil de usuario
-    path("perfil/<str:username>/", views.perfil_usuario, name="perfil_usuario"),
-
-    #valoraciones
-    path("receta/<slug:slug>/valorar/", views.valorar_receta, name="valorar_receta"),   
-    
-]
+    path("", include("recetas.urls")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
