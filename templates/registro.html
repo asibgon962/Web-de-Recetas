@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta — La Cocina de Casa{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="auth-card">
+    <h2>👨‍🍳 Crear cuenta</h2>
+    <form method="post" class="form-rustico">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="text-muted small mt-1">{{ field.help_text }}</div>{% endif %}
+          {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary-rustico w-100 py-2 mt-2">Crear cuenta</button>
+    </form>
+    <hr style="border-color:var(--color-borde)">
+    <p class="text-center mb-0">¿Ya tienes cuenta?
+      <a href="{% url 'login' %}" style="color:var(--color-secundario);font-weight:700">Inicia sesión</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

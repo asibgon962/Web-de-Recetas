@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}{{ receta.titulo }} — La Cocina de Casa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Imagen principal -->
+  {% if receta.imagen %}
+    <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}" class="receta-hero-img">
+  {% endif %}
+
+  <!-- Título y meta -->
+  <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
+    <div>
+      {% if receta.categoria %}
+        <a href="{% url 'listado_recetas' %}?categoria={{ receta.categoria.slug }}"
+           class="badge text-decoration-none mb-2"
+           style="background:var(--color-borde);color:var(--color-texto);font-size:.85rem">
+          {{ receta.categoria.nombre }}
+        </a>
+      {% endif %}
+      <h1 class="mb-1">{{ receta.titulo }}</h1>
+      <p class="text-muted mb-0">
+        Por <a href="{% url 'perfil_usuario' receta.autor.username %}" class="fw-bold text-decoration-none" style="color:var(--color-secundario)">{{ receta.autor.username }}</a>
+        &mdash; {{ receta.creado_en|date:"j \d\e F, Y" }}
+      </p>
+    </div>
+    {% if user == receta.autor %}
+      <div class="d-flex gap-2">
+        <a href="{% url 'editar_receta' receta.slug %}" class="btn btn-outline-rustico btn-sm">
+          <i class="bi bi-pencil"></i> Editar
+        </a>
+        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar">
+          <i class="bi bi-trash"></i> Eliminar
+        </button>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Descripción -->
+  <p class="lead mb-4" style="color:var(--color-texto)">{{ receta.descripcion }}</p>
+
+  <!-- Metadatos -->
+  <div class="receta-meta-box mb-5">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3 meta-item">
+        <div class="meta-icon">⏱️</div>
+        <div class="meta-label">Preparación</div>
+        <div class="meta-valor">{{ receta.tiempo_preparacion }} min</div>
+      </div>
+      <div class="col-6 col-md-3 meta-item">
+        <div class="meta-icon">🔥</div>
+        <div class="meta-label">Cocción</div>
+        <div class="meta-valor">{{ receta.tiempo_coccion }} min</div>
+      </div>
+      <div class="col-6 col-md-3 meta-item">
+        <div class="meta-icon">🍽️</div>
+        <div class="meta-label">Porciones</div>
+        <div class="meta-valor">{{ receta.porciones }}</div>
+      </div>
+      <div class="col-6 col-md-3 meta-item">
+        <div class="meta-icon">📊</div>
+        <div class="meta-label">Dificultad</div>
+        <div class="meta-valor">{{ receta.get_dificultad_display }}</div>
+      </div>
+    </div>
+    {% if receta.valoracion_media %}
+      <hr style="border-color:var(--color-borde)" class="my-3">
+      <div class="text-center">
+        <span class="estrellas">
+          {% with v=receta.valoracion_media %}
+            {% for i in "12345" %}
+              {% if forloop.counter <= v %}★{% else %}☆{% endif %}
+            {% endfor %}
+          {% endwith %}
+        </span>
+        <span class="ms-2 fw-bold">{{ receta.valoracion_media }}/5</span>
+        <span class="text-muted small">({{ receta.valoraciones.count }} valoraciones)</span>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="row g-5">
+    <!-- Ingredientes -->
+    <div class="col-12 col-md-4">
+      <h3 class="mb-3"><i class="bi bi-basket2"></i> Ingredientes</h3>
+      <div class="ingredientes-box">
+        <ul class="list-unstyled mb-0">
+          {% for ri in ingredientes %}
+            <li>
+              {% if ri.cantidad %}
+                <strong>{{ ri.cantidad|floatformat:"-2" }} {{ ri.get_unidad_display }}</strong>
+              {% endif %}
+              {{ ri.ingrediente.nombre }}
+              {% if ri.nota %}<span class="text-muted small"> — {{ ri.nota }}</span>{% endif %}
+            </li>
+          {% empty %}
+            <li class="text-muted">Sin ingredientes registrados.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div class="col-12 col-md-8">
+      <h3 class="mb-3"><i class="bi bi-journal-text"></i> Preparación</h3>
+      <div class="instrucciones-box">{{ receta.instrucciones }}</div>
+    </div>
+  </div>
+
+  <!-- ── Sección de comentarios ── -->
+  <hr class="separador-rustico">
+  <div class="seccion-comentarios">
+    <h3 class="mb-4"><i class="bi bi-chat-heart"></i> Comentarios y valoraciones</h3>
+
+    <!-- Listado de comentarios -->
+    {% if valoraciones %}
+      {% for val in valoraciones %}
+        <div class="comentario-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="autor-nombre"><i class="bi bi-person-circle me-1"></i>{{ val.autor.username }}</span>
+              <span class="estrellas ms-2">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= val.puntuacion %}★{% else %}☆{% endif %}
+                {% endfor %}
+              </span>
+              <span class="text-muted small ms-2">{{ val.creado_en|date:"j M Y" }}</span>
+            </div>
+            {% if user == val.autor %}
+              <form method="post" action="{% url 'eliminar_valoracion' val.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Eliminar comentario"
+                  onclick="return confirm('¿Eliminar tu comentario?')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            {% endif %}
+          </div>
+          {% if val.comentario %}
+            <p class="mt-2 mb-0">{{ val.comentario }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">Todavía nadie ha comentado. ¡Sé el primero!</p>
+    {% endif %}
+
+    <!-- Formulario de nueva valoración -->
+    <div class="mt-4">
+      {% if user.is_authenticated %}
+        {% if ya_valoro %}
+          <div class="alert" style="background:var(--color-suave);border-color:var(--color-borde)">
+            <i class="bi bi-check-circle me-2" style="color:var(--color-secundario)"></i>Ya has valorado esta receta.
+          </div>
+        {% elif form_valoracion %}
+          <h5 class="mb-3">Deja tu valoración</h5>
+          <div style="background:#fff;border:1px solid var(--color-borde);border-radius:10px;padding:24px">
+            <form method="post" class="form-rustico">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">Puntuación</label>
+                {{ form_valoracion.puntuacion }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Comentario <span class="text-muted fw-normal">(opcional)</span></label>
+                {{ form_valoracion.comentario }}
+              </div>
+              <button type="submit" class="btn btn-primary-rustico">
+                <i class="bi bi-send me-1"></i> Enviar valoración
+              </button>
+            </form>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="alert" style="background:var(--color-suave);border-color:var(--color-borde)">
+          <i class="bi bi-lock me-2"></i>
+          <a href="{% url 'login' %}?next={{ request.path }}" class="fw-bold" style="color:var(--color-primario)">Inicia sesión</a>
+          para dejar tu valoración.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmar eliminar receta -->
+{% if user == receta.autor %}
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Eliminar receta?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Vas a eliminar <strong>{{ receta.titulo }}</strong>. Esta acción no se puede deshacer.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form method="post" action="{% url 'eliminar_receta' receta.slug %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
