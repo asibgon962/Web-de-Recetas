@@ -122,7 +122,7 @@
               <span class="autor-nombre"><i class="bi bi-person-circle me-1"></i>{{ val.autor.username }}</span>
               <span class="estrellas ms-2">
                 {% for i in "12345" %}
-                  {% if forloop.counter <= val.puntuacion %}★{% else %}☆{% endif %}
+                  {% if forloop.counter <= val.valoracion %}★{% else %}☆{% endif %}
                 {% endfor %}
               </span>
               <span class="text-muted small ms-2">{{ val.creado_en|date:"j M Y" }}</span>
@@ -160,7 +160,7 @@
               {% csrf_token %}
               <div class="mb-3">
                 <label class="form-label">Puntuación</label>
-                {{ form_valoracion.puntuacion }}
+                {{ form_valoracion.valoracion }}
               </div>
               <div class="mb-3">
                 <label class="form-label">Comentario <span class="text-muted fw-normal">(opcional)</span></label>

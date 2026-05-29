@@ -47,7 +47,7 @@ class Receta(models.Model):
     categoria = models.ForeignKey(categoria, on_delete=models.SET_NULL, null=True, blank=True, related_name='recetas')
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
-    publicado = models.BooleanField(default=False)
+    publicado = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = "recetas"
@@ -99,7 +99,7 @@ class RecetaIngrediente(models.Model):
 class Valoracion(models.Model):
     receta = models.ForeignKey(Receta, on_delete=models.CASCADE, related_name='valoraciones')
     autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='valoraciones')
-    puntuacion = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    valoracion = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comentario = models.TextField(blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
@@ -110,6 +110,6 @@ class Valoracion(models.Model):
         ordering = ['-creado_en']
 
     def __str__(self):
-        return f"{self.autor.username} valoró {self.receta.titulo} con {self.puntuacion} estrellas"
+        return f"{self.autor.username} valoró {self.receta.titulo} con {self.valoracion} estrellas"
     
     

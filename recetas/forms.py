@@ -48,11 +48,12 @@ class RecetaIngredienteForm(forms.ModelForm):
 class ValoracionForm(forms.ModelForm):
     class Meta:
         model = Valoracion
-        fields = ["puntuacion", "comentario"]
+        fields = ["valoracion", "comentario"]
         widgets = {
-            "puntuacion": forms.Select(
+            "valoracion": forms.Select(
                 choices=[(i, f"{i} ★") for i in range(1, 6)],
                 attrs={"class": "form-select"}
             ),
             "comentario": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Cuéntanos qué te pareció..."}),
         }
+
