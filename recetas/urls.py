@@ -12,7 +12,7 @@ urlpatterns = [
 
     # Rutas de recetas
     path("", views.listado_recetas, name="listado_recetas"),
-    path("reta/nueva/", views.crear_receta, name="crear_receta"),
+    path("receta/nueva/", views.crear_receta, name="crear_receta"),
     path("receta/<slug:slug>/", views.detalle_receta, name="detalle_receta"),
     path("receta/<slug:slug>/editar/", views.editar_receta, name="editar_receta"),
     path("receta/<slug:slug>/eliminar/", views.eliminar_receta, name="eliminar_receta"),
