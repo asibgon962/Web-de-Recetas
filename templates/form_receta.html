@@ -85,7 +85,7 @@
         {{ formset.management_form }}
         <div id="ingredientes-container">
           {% for f in formset %}
-            <div class="formset-ingrediente">
+            <div class="formset-ingrediente position-relative">
               <div class="row g-2 align-items-end">
                 <div class="col-md-4">
                   <label class="form-label small">Ingrediente</label>
@@ -103,13 +103,10 @@
                   <label class="form-label small">Nota</label>
                   {{ f.nota }}
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
-                  {% if f.instance.pk %}
-                    <div class="form-check">
-                      {{ f.DELETE }}
-                      <label class="form-check-label text-danger small" title="Eliminar">🗑</label>
-                    </div>
-                  {% endif %}
+                <div class="col-md-1 d-flex align-items-end justify-content-center">
+                  <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-ingrediente" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
               </div>
               {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
@@ -139,18 +136,60 @@
   const btnAnadir = document.getElementById('btn-anadir-ingrediente');
   const totalForms = document.getElementById('id_form-TOTAL_FORMS');
 
+  // Eliminar ingrediente: oculta la fila y activa el checkbox DELETE si existe
+  function agregarBotonEliminar(fila) {
+    const btn = fila.querySelector('.btn-eliminar-ingrediente');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      // Si tiene checkbox DELETE (ingrediente guardado en BD), márcalo y oculta
+      const deleteCheckbox = fila.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (deleteCheckbox) {
+        deleteCheckbox.checked = true;
+        fila.style.display = 'none';
+      } else {
+        // Fila nueva no guardada: eliminar del DOM y restar contador
+        fila.remove();
+        totalForms.value = parseInt(totalForms.value) - 1;
+        renumerarFormset();
+      }
+    });
+  }
+
+  // Renumera los índices del formset tras eliminar una fila nueva
+  function renumerarFormset() {
+    const filas = container.querySelectorAll('.formset-ingrediente');
+    filas.forEach((fila, idx) => {
+      fila.querySelectorAll('input, select, textarea').forEach(el => {
+        if (el.name) el.name = el.name.replace(/form-(\d+)-/, 'form-' + idx + '-');
+        if (el.id)   el.id   = el.id.replace(/id_form-(\d+)-/, 'id_form-' + idx + '-');
+      });
+      fila.querySelectorAll('label').forEach(el => {
+        if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/id_form-(\d+)-/, 'id_form-' + idx + '-');
+      });
+    });
+  }
+
+  // Añadir nueva fila
   btnAnadir.addEventListener('click', function () {
     const formCount = parseInt(totalForms.value);
     const firstForm = container.querySelector('.formset-ingrediente');
     const newForm = firstForm.cloneNode(true);
 
+    newForm.style.display = '';
     newForm.innerHTML = newForm.innerHTML.replace(/form-(\d+)-/g, 'form-' + formCount + '-');
-
-    newForm.querySelectorAll('input, textarea').forEach(el => el.value = '');
+    newForm.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => el.value = '');
     newForm.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+    // Eliminar checkboxes DELETE de filas nuevas
+    newForm.querySelectorAll('input[type="checkbox"]').forEach(el => el.remove());
 
     container.appendChild(newForm);
     totalForms.value = formCount + 1;
+    agregarBotonEliminar(newForm);
+  });
+
+  // Activar botón eliminar en filas ya existentes
+  container.querySelectorAll('.formset-ingrediente').forEach(fila => {
+    agregarBotonEliminar(fila);
   });
 </script>
 {% endblock %}
