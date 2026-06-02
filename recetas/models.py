@@ -48,6 +48,7 @@ class Receta(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
     publicado = models.BooleanField(default=True)
+    favoritos = models.ManyToManyField(User, related_name='recetas_favoritas', blank=True,)
 
     class Meta:
         verbose_name_plural = "recetas"

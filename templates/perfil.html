@@ -75,5 +75,44 @@
       {% endif %}
     </div>
   {% endif %}
+
+  <!-- Favoritos (solo visible para el propio usuario) -->
+  {% if user == usuario %}
+    <hr class="separador-rustico">
+    <h3 class="mb-4">❤️ Mis favoritos</h3>
+    {% with favoritas=usuario.recetas_favoritas.all %}
+      {% if favoritas %}
+        <div class="row g-4">
+          {% for receta in favoritas %}
+            <div class="col-12 col-sm-6 col-lg-4">
+              <div class="card-receta h-100 d-flex flex-column">
+                <a href="{% url 'detalle_receta' receta.slug %}">
+                  {% if receta.imagen %}
+                    <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}">
+                  {% else %}
+                    <div class="card-img-placeholder">🍲</div>
+                  {% endif %}
+                </a>
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">
+                    <a href="{% url 'detalle_receta' receta.slug %}" class="text-decoration-none" style="color:var(--color-primario)">
+                      {{ receta.titulo }}
+                    </a>
+                  </h5>
+                  <p class="text-muted small mb-0">Por {{ receta.autor.username }}</p>
+                  <div class="mt-auto pt-2 small text-muted">
+                    <span><i class="bi bi-clock"></i> {{ receta.tiempo_total }} min</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Aún no tienes recetas guardadas en favoritos.</p>
+      {% endif %}
+    {% endwith %}
+  {% endif %}
+
 </div>
 {% endblock %}

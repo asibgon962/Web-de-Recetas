@@ -25,16 +25,30 @@
         &mdash; {{ receta.creado_en|date:"j \d\e F, Y" }}
       </p>
     </div>
-    {% if user == receta.autor %}
-      <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'toggle_favorito' receta.slug %}">
+          {% csrf_token %}
+          {% if user in receta.favoritos.all %}
+            <button type="submit" class="btn btn-sm btn-warning">
+              <i class="bi bi-heart-fill"></i> Quitar de favoritos
+            </button>
+          {% else %}
+            <button type="submit" class="btn btn-sm btn-outline-warning">
+              <i class="bi bi-heart"></i> Guardar en favoritos
+            </button>
+          {% endif %}
+        </form>
+      {% endif %}
+      {% if user == receta.autor %}
         <a href="{% url 'editar_receta' receta.slug %}" class="btn btn-outline-rustico btn-sm">
           <i class="bi bi-pencil"></i> Editar
         </a>
         <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar">
           <i class="bi bi-trash"></i> Eliminar
         </button>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 
   <!-- Descripción -->
@@ -108,12 +122,11 @@
     </div>
   </div>
 
-  <!-- ── Sección de comentarios ── -->
+  <!-- Sección de comentarios -->
   <hr class="separador-rustico">
   <div class="seccion-comentarios">
     <h3 class="mb-4"><i class="bi bi-chat-heart"></i> Comentarios y valoraciones</h3>
 
-    <!-- Listado de comentarios -->
     {% if valoraciones %}
       {% for val in valoraciones %}
         <div class="comentario-card">
@@ -146,7 +159,6 @@
       <p class="text-muted">Todavía nadie ha comentado. ¡Sé el primero!</p>
     {% endif %}
 
-    <!-- Formulario de nueva valoración -->
     <div class="mt-4">
       {% if user.is_authenticated %}
         {% if ya_valoro %}
@@ -159,7 +171,7 @@
             <form method="post" class="form-rustico">
               {% csrf_token %}
               <div class="mb-3">
-                <label class="form-label">Puntuación</label>
+                <label class="form-label">Valoración</label>
                 {{ form_valoracion.valoracion }}
               </div>
               <div class="mb-3">

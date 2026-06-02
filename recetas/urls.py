@@ -17,6 +17,8 @@ urlpatterns = [
     path("receta/<slug:slug>/editar/", views.editar_receta, name="editar_receta"),
     path("receta/<slug:slug>/eliminar/", views.eliminar_receta, name="eliminar_receta"),
     path("valoracion/<int:pk>/eliminar/", views.eliminar_valoracion, name="eliminar_valoracion"),
+    path("receta/<slug:slug>/favorito/", views.toggle_favorito, name="toggle_favorito"),
+
     # Ruta de perfil de usuario
     path("perfil/<str:username>/", views.perfil_usuario, name="perfil_usuario"),
 

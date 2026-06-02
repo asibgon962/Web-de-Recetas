@@ -232,3 +232,15 @@ def perfil_usuario(request, username):
         "usuario": usuario,
         "recetas": recetas,
     })
+
+
+@login_required
+def toggle_favorito(request, slug):
+    receta = get_object_or_404(Receta, slug=slug)
+    if request.user in receta.favoritos.all():
+        receta.favoritos.remove(request.user)
+        messages.info(request, "Eliminado de favoritos.")
+    else:
+        receta.favoritos.add(request.user)
+        messages.success(request, "¡Añadido a favoritos!")
+    return redirect("detalle_receta", slug=slug)
