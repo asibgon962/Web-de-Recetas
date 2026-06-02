@@ -4,8 +4,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.forms import modelformset_factory
-from .models import Receta, categoria, RecetaIngrediente, Valoracion
-from .forms import RecetaForm, RecetaIngredienteForm, ValoracionForm
+from .models import PerfilUsuario, Receta, categoria, RecetaIngrediente, Valoracion
+from .forms import PerfilForm, RecetaForm, RecetaIngredienteForm, ValoracionForm
 
 # Autetificación
 
@@ -227,10 +227,12 @@ def eliminar_receta(request, slug):
 def perfil_usuario(request, username):
     from django.contrib.auth.models import User
     usuario = get_object_or_404(User, username=username)
-    recetas = Receta.objects.filter(autor=usuario, publicado=True).order_by("-creado_en")
-    return render(request, "perfil.html", {
-        "usuario": usuario,
-        "recetas": recetas,
+    recetas = Receta.objects.filter(autor=usuario, publicado=True).order_by('-creado_en')
+    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=usuario)
+    return render(request, 'perfil.html', {
+        'usuario': usuario,
+        'recetas': recetas,
+        'perfil': perfil,
     })
 
 
@@ -244,3 +246,16 @@ def toggle_favorito(request, slug):
         receta.favoritos.add(request.user)
         messages.success(request, "¡Añadido a favoritos!")
     return redirect("detalle_receta", slug=slug)
+
+@login_required
+def editar_perfil(request):
+    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=request.user)
+    if request.method == 'POST':
+        form = PerfilForm(request.POST, request.FILES, instance=perfil)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Perfil actualizado!')
+            return redirect('perfil_usuario', username=request.user.username)
+    else:
+        form = PerfilForm(instance=perfil)
+    return render(request, 'editar_perfil.html', {'form': form})

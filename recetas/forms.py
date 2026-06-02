@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.text import slugify
 from .models import Receta, RecetaIngrediente, Valoracion
-
+from .models import PerfilUsuario
 
 class RecetaForm(forms.ModelForm):
     class Meta:
@@ -57,3 +57,11 @@ class ValoracionForm(forms.ModelForm):
             "comentario": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Cuéntanos qué te pareció..."}),
         }
 
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ['foto', 'biografia']
+        widgets = {
+            'foto': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'biografia': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Cuéntanos algo sobre ti...'}),
+        }
