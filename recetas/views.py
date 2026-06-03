@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404,redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,8 +6,9 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.forms import modelformset_factory
 from .models import PerfilUsuario, Receta, categoria, RecetaIngrediente, Valoracion
 from .forms import PerfilForm, RecetaForm, RecetaIngredienteForm, ValoracionForm
+from django.db.models import Q
 
-# Autetificación
+# Autenticación
 
 def registro(request):
     if request.user.is_authenticated:
@@ -22,7 +23,7 @@ def registro(request):
     else:
         form = UserCreationForm()
     return render(request, 'registro.html', {'form': form})
-    
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('listado_recetas')
@@ -37,7 +38,6 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
-
 def logout_view(request):
     if request.method == 'POST':
         logout(request)
@@ -49,17 +49,17 @@ def logout_view(request):
 def listado_recetas(request):
     recetas = Receta.objects.filter(publicado=True).select_related("autor", "categoria")
     categorias = categoria.objects.all()
- 
+
     categoria_slug = request.GET.get("categoria")
     categoria_activa = None
     if categoria_slug:
         categoria_activa = get_object_or_404(categoria, slug=categoria_slug)
         recetas = recetas.filter(categoria=categoria_activa)
- 
+
     query = request.GET.get("q", "").strip()
     if query:
         recetas = recetas.filter(titulo__icontains=query)
- 
+
     orden = request.GET.get("orden", "-creado_en")
     opciones_orden = {
         "-creado_en": "-creado_en",
@@ -67,7 +67,7 @@ def listado_recetas(request):
         "tiempo_preparacion": "tiempo_preparacion",
     }
     recetas = recetas.order_by(opciones_orden.get(orden, "-creado_en"))
- 
+
     return render(request, "listado.html", {
         "recetas": recetas,
         "categorias": categorias,
@@ -87,7 +87,7 @@ def detalle_receta(request, slug):
         valoraciones.filter(autor=request.user).exists()
     )
     form_valoracion = ValoracionForm() if request.user.is_authenticated and not ya_valoro else None
- 
+
     if request.method == "POST":
         if not request.user.is_authenticated:
             messages.error(request, "Debes iniciar sesión para comentar.")
@@ -95,7 +95,7 @@ def detalle_receta(request, slug):
         if ya_valoro:
             messages.error(request, "Ya has valorado esta receta.")
             return redirect("detalle_receta", slug=slug)
- 
+
         form_valoracion = ValoracionForm(request.POST)
         if form_valoracion.is_valid():
             valoracion = form_valoracion.save(commit=False)
@@ -104,7 +104,7 @@ def detalle_receta(request, slug):
             valoracion.save()
             messages.success(request, "¡Valoración enviada!")
             return redirect("detalle_receta", slug=slug)
- 
+
     return render(request, "detalle.html", {
         "receta": receta,
         "ingredientes": ingredientes,
@@ -115,14 +115,18 @@ def detalle_receta(request, slug):
 
 # Eliminar valoración
 
-
 @login_required
 def eliminar_valoracion(request, pk):
-    valoracion = get_object_or_404(Valoracion, pk=pk, autor=request.user)
+    valoracion = get_object_or_404(Valoracion, pk=pk)
+
+    if valoracion.autor != request.user and not request.user.is_staff:
+        messages.error(request, "No tienes permiso para eliminar este comentario.")
+        return redirect("detalle_receta", slug=valoracion.receta.slug)
+
     slug = valoracion.receta.slug
     if request.method == "POST":
         valoracion.delete()
-        messages.success(request, "Comentario eliminado.")
+        messages.success(request, "Comentario eliminado correctamente.")
     return redirect("detalle_receta", slug=slug)
 
 # Crear Receta
@@ -152,7 +156,7 @@ def crear_receta(request):
     else:
         form = RecetaForm()
         formset = IngredienteFormSet(queryset=RecetaIngrediente.objects.none())
- 
+
     return render(request, "form_receta.html", {
         "form": form,
         "formset": formset,
@@ -167,7 +171,7 @@ def editar_receta(request, slug):
     if receta.autor != request.user:
         messages.error(request, "No tienes permiso para editar esta receta.")
         return redirect("detalle_receta", slug=slug)
- 
+
     IngredienteFormSet = modelformset_factory(
         RecetaIngrediente,
         form=RecetaIngredienteForm,
@@ -198,14 +202,13 @@ def editar_receta(request, slug):
         formset = IngredienteFormSet(
             queryset=RecetaIngrediente.objects.filter(receta=receta)
         )
- 
+
     return render(request, "form_receta.html", {
         "form": form,
         "formset": formset,
         "receta": receta,
         "accion": "Editar",
     })
-
 
 # Eliminar Receta
 
@@ -221,7 +224,6 @@ def eliminar_receta(request, slug):
         return redirect("listado_recetas")
     return render(request, "confirmar_eliminar.html", {"receta": receta})
 
-
 # Perfil de Usuario
 
 def perfil_usuario(request, username):
@@ -234,7 +236,6 @@ def perfil_usuario(request, username):
         'recetas': recetas,
         'perfil': perfil,
     })
-
 
 @login_required
 def toggle_favorito(request, slug):

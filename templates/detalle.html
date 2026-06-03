@@ -140,11 +140,11 @@
               </span>
               <span class="text-muted small ms-2">{{ val.creado_en|date:"j M Y" }}</span>
             </div>
-            {% if user == val.autor %}
+            {% if user == val.autor or user.is_staff %}
               <form method="post" action="{% url 'eliminar_valoracion' val.pk %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Eliminar comentario"
-                  onclick="return confirm('¿Eliminar tu comentario?')">
+                  onclick="return confirm('¿Eliminar este comentario?')">
                   <i class="bi bi-trash"></i>
                 </button>
               </form>
@@ -171,7 +171,7 @@
             <form method="post" class="form-rustico">
               {% csrf_token %}
               <div class="mb-3">
-                <label class="form-label">Valoración</label>
+                <label class="form-label">Puntuación</label>
                 {{ form_valoracion.valoracion }}
               </div>
               <div class="mb-3">
