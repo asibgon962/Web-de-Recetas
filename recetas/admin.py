@@ -25,7 +25,7 @@ class IngredienteAdmin(admin.ModelAdmin):
 
 @admin.register(Valoracion)
 class ValoracionAdmin(admin.ModelAdmin):
-    class ValoracionAdmin(admin.ModelAdmin):
-        list_display = ('receta', 'usuario', 'puntuacion', 'comentario', 'creado_en')
-        list_filter = ('puntuacion', 'creado_en')
+    
+    list_display = ('receta', 'autor', 'valoracion', 'comentario', 'creado_en')
+    list_filter = ('valoracion', 'creado_en')
 
